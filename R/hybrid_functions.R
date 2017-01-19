@@ -118,7 +118,7 @@ EvaluateBarcodes <- function(bam.dt, barcodeindex) {
                                R_seqnames, R_start, R_strand, R_width, R_qname)]
   
   setkey(hybrids.dt, random_barcode, L_seqnames, L_start, R_seqnames, R_start, L_strand, R_strand)
-  unique_hybrids.dt <- unique(hybrids.dt) # == YS BED collapsed
+  unique_hybrids.dt <- unique(hybrids.dt, by = c("random_barcode", "L_seqnames", "L_start", "R_seqnames", "R_start", "L_strand", "R_strand")) # == YS BED collapsed
   results.dt <- unique_hybrids.dt[, .(read, L_seqnames, L_start, L_strand, L_width, L_qname,
                                       R_seqnames, R_start, R_strand, R_width, R_qname)]
   cat("There are", nrow(results.dt), "unique hybrid reads.\n")
@@ -771,7 +771,7 @@ CreateBED <- function(gc.grl, filename) {
   # Add score
   score <- data.table(id = combined$id, score = combined$score)
   setkey(score, id)
-  score <- unique(score) # need to get unique score by id
+  score <- unique(score, by = "id") # need to get unique score by id
   
   bed <- read.delim(file.path(results.dir, filename), header = FALSE)
   bed[, 5] <- score$score

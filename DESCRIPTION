@@ -2,12 +2,13 @@ Package: hiclipr
 Type: Package
 Title: Analyses hiCLIP data
 Version: 0.3
-Date: 2016-06-24
-Author: person("Anob", "Chakrabarti", email = "anob.chakrabarti@crick.ac.uk",
-    role = c("aut", "cre"))
+Date: 2017-01-18
+Authors@R: c(
+    person("Anob", "Chakrabarti", email = "anob.chakrabarti@crick.ac.uk", role = c("aut", "cre")),
+    person("Yoichiro", "Sugimoto", email = "yoichiro.sugimoto@crick.ac.uk", role = "aut"))
 Maintainer: <anob.chakrabarti@crick.ac.uk>
 Description: This package analyses hiCLIP data. It starts with barcode processing and hybrid read selection followed by alignment. (These functions use Cutadapt, Bowtie2, Samtools and Sambamba.) Then PCR duplicates are removed and there are downstream analysis functions as in the original hiCLIP paper.
-License: What license is it under?
+License: GPL-3
 LazyData: TRUE
 Depends: GenomicRanges
 Imports:

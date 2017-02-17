@@ -17,4 +17,3 @@ data.table of duplexes
 \description{
 Get start positions for each arm and width for longest duplex.
 }
-

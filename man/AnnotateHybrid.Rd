@@ -15,4 +15,3 @@ annotated data.table
 \description{
 Annotates each arm of a hybrid data.table using rna.tc.gr
 }
-

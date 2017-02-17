@@ -12,4 +12,3 @@ Bowtie indices
 \description{
 Create Bowtie indices
 }
-

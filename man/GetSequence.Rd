@@ -15,4 +15,3 @@ hybrid data.table with sequences
 \description{
 Get sequence from annotated hybrid data.table
 }
-

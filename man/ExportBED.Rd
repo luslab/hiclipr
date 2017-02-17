@@ -17,4 +17,3 @@ BED file
 \description{
 Export genomic coordinate BED file from hybrid data.table
 }
-

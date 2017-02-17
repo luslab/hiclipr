@@ -20,4 +20,3 @@ hybrid data.table
 \description{
 Select genic reads (only for those with both arms mapped to genes)
 }
-

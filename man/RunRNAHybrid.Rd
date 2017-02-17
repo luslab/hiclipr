@@ -17,4 +17,3 @@ annotated hybrid data.table with sequences
 \description{
 Run RNA Hybrid using info from hybrid data table
 }
-

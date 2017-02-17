@@ -88,6 +88,7 @@ LoadBAM <- function(bam.file) {
 #'
 #' @importFrom data.table ":=" data.table fread melt rbindlist setkey setnames ".N"
 #' @import GenomicRanges
+#' @import ggplot2
 #' @export
 
 EvaluateBarcodes <- function(bam.dt, barcodeindex) {
@@ -109,8 +110,6 @@ EvaluateBarcodes <- function(bam.dt, barcodeindex) {
   hybrids.dt[, duplicates := .N, by = .(random_barcode,
                                         L_seqnames, L_start, L_strand,
                                         R_seqnames, R_start, R_strand)]
-  cat("This is the frequency table of PCR duplicates:")
-  print(table(hybrids.dt$duplicates))
   
   # Remove PCR duplicates
   cat("Collapsing PCR duplicates.\n")
@@ -119,6 +118,15 @@ EvaluateBarcodes <- function(bam.dt, barcodeindex) {
   
   setkey(hybrids.dt, random_barcode, L_seqnames, L_start, R_seqnames, R_start, L_strand, R_strand)
   unique_hybrids.dt <- unique(hybrids.dt, by = c("random_barcode", "L_seqnames", "L_start", "R_seqnames", "R_start", "L_strand", "R_strand")) # == YS BED collapsed
+  
+  # Histogram of duplicates
+  ggplot(unique_hybrids.dt, aes(x = duplicates)) + 
+    geom_histogram(boundary = 0, binwidth = 5) +
+    labs(title = "Duplication levels",
+      y = "Count",
+      x = "Number of duplicates") +
+    theme_minimal()
+
   results.dt <- unique_hybrids.dt[, .(read, L_seqnames, L_start, L_strand, L_width, L_qname,
                                       R_seqnames, R_start, R_strand, R_width, R_qname)]
   cat("There are", nrow(results.dt), "unique hybrid reads.\n")

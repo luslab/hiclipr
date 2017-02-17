@@ -17,4 +17,3 @@ GRanges object
 \description{
 Convert data.table to GRanges keeping metadata
 }
-

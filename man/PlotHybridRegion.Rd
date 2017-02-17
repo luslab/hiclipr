@@ -17,4 +17,3 @@ plot and table to command line
 \description{
 Plot the hybrid region for all arms
 }
-

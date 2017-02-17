@@ -17,4 +17,3 @@ FASTQ file and random barcode tsv
 \description{
 Extract random barcodes and leave experiment barcode at front
 }
-

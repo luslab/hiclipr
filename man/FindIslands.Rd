@@ -19,4 +19,3 @@ annotated hybrid data.table
 \description{
 Find confident hybrid islands
 }
-

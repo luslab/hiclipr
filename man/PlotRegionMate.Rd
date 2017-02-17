@@ -20,4 +20,3 @@ plot
 \description{
 Plot the mate for a given region
 }
-

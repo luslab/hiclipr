@@ -17,4 +17,3 @@ hybrid data.table
 \description{
 Find hybrid reads that do not overlap an island
 }
-

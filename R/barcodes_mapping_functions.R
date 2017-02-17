@@ -22,6 +22,13 @@ ExtractRandomBarcodes <- function(fq.file, barcode.filename) {
   # Step 1 - Adds read number to header for later identification (have kept quality data, unlike original paper)
   cat("Assigning read number to FASTQ header\n")
   fq <- readFastq(paste0(data.dir, fq.file))
+ 
+  # Ensure reads are long enough, otherwise narrow won't work
+  if(min(width(fq)) < 10) {
+  print("Some reads are shorter than random + experimental barcode. Aborting")
+  stop()
+  }
+ 
   id <- BStringSet(1:length(fq)) # renames by read number
   fq <- ShortReadQ(sread = sread(fq), id = id, quality = quality(fq))
   

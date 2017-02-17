@@ -17,4 +17,3 @@ plot
 \description{
 Plot the intra-inter ratio (for genic reads)
 }
-

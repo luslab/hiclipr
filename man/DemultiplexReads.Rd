@@ -17,4 +17,3 @@ FASTQ files as per experimental barcodes
 \description{
 Demultiplex reads using experimental barcode
 }
-

@@ -15,4 +15,3 @@ data.table or hybrid data.table
 \description{
 Converts from GRanges to data.table. If only one arm then returns single data.table, if both arms then returns hybrid data.table
 }
-

@@ -15,4 +15,3 @@ Annotated GRanges object
 \description{
 Annotates GRanges arm (created using ConvertToGRanges) using rna.tc.gr
 }
-

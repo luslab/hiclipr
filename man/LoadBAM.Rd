@@ -15,4 +15,3 @@ data.table of valid hybrids
 \description{
 Loads hybrid reads from BAM and identify valid reads (i.e both L and R arms aligned)
 }
-

@@ -15,4 +15,3 @@ New directories
 \description{
 Create directory structure
 }
-

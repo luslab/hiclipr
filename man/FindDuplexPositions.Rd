@@ -15,4 +15,3 @@ list of duplex starts and length
 \description{
 Get start positions for each arm and width for longest duplex. Called by FindDuplex
 }
-

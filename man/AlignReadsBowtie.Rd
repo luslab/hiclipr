@@ -19,4 +19,3 @@ SAM file of alignments
 \description{
 Align reads and merge as directed
 }
-

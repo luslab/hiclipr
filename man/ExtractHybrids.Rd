@@ -19,4 +19,3 @@ FASTQ file of L and R arms (unzipped)
 \description{
 Remove A and B adapters to select hybrid reads expanding on YS's strategy
 }
-

@@ -15,4 +15,3 @@ GRangesList of length two (L and R arms)
 \description{
 Convert from transcriptomic to genomic coordinates
 }
-

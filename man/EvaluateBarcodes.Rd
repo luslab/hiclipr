@@ -17,4 +17,3 @@ data.table of unique hybrids
 \description{
 Matches arms from BAM and uses random barcode to remove PCR duplicates
 }
-

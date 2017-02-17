@@ -19,4 +19,3 @@ plot
 \description{
 Plot the hybrid region for all arms for genic reads and facet by intra/inter
 }
-

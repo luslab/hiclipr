@@ -194,6 +194,12 @@ ExtractHybrids <- function(fq.file, adapterA, adapterB) {
   reads.ds <- reads.ds[!(tooshort)]
   quality.bs <- quality.bs[!(tooshort)]
   
+  # Remove reads that have a negative start (i.e. adapter B overhang)
+  overhang <- start(hybrid.ir) < 1
+  hybrid.ir <- hybrid.ir[!overhang]
+  reads.ds <- reads.ds[!(overhang)]
+  quality.bs <- quality.bs[!(overhang)]
+
   # Create R and L arms of hybrid reads
   cat("Splitting right and left arms\n")
   R.reads.ds <- DNAStringSet(reads.ds, start = 1, end = (start(hybrid.ir)-1)) # R arm is from start of read to start of adapter B

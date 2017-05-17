@@ -169,6 +169,9 @@ ConvertToGRanges <- function(hybrid.dt, arm = c("all", "left", "right")) {
   L.names <- L.names[grep("R_", L.names, invert = TRUE)] # filter out R arm metadata
   df <- as.data.frame(hybrid.dt, stringsAsFactors = FALSE) # convert data.table to dataframe for lapply
   metadata <- sapply(L.names, function(x) df[, colnames(df) %in% x]) # get matrix of each metadata column
+  
+  if(is.vector(metadata)) metadata <- matrix(metadata, ncol = length(metadata), dimnames = list(NULL, names(metadata))) # If only 1 item become a vector so need to convert to matrix
+  
   metadata <- as.data.frame(metadata, stringsAsFactors = FALSE) # convert to dataframe without strings as factors
   mcols(L.gr) <- metadata # add to GRanges
   
@@ -183,6 +186,7 @@ ConvertToGRanges <- function(hybrid.dt, arm = c("all", "left", "right")) {
   R.names <- R.names[grep("L_", R.names, invert = TRUE)] # filter out L arm metadata
   df <- as.data.frame(hybrid.dt, stringsAsFactors = FALSE) # convert data.table to dataframe for lapply
   metadata <- sapply(R.names, function(x) df[, colnames(df) %in% x]) # get matrix of each metadata column
+  if(is.vector(metadata)) metadata <- matrix(metadata, ncol = length(metadata), dimnames = list(NULL, names(metadata))) # If only 1 item become a vector so need to convert to matrix
   metadata <- as.data.frame(metadata, stringsAsFactors = FALSE) # convert to dataframe without strings as factors
   mcols(R.gr) <- metadata # add to GRanges
   

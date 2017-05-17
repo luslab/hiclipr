@@ -165,71 +165,77 @@ ExtractHybrids <- function(fq.file, adapterA, adapterB) {
   fq <- append(fq1, fq2) # combines the two
   B <- vcountPattern(adapterB, subject = sread(fq), max.mismatch = 2, with.indels = FALSE) # counts instance of B
   fq <- fq[B > 0] # selects only those with 1 (or more) B
+  if(length(fq) == 0) {
+    
+    message("No hybrid reads detected")
+    
+  } else {
   
-  # Extract components of ShortRead
-  reads.ds <- sread(fq)
-  quality.bs <- quality(fq)@quality # extract quality as a BString
-  names(reads.ds) <- id(fq)
-  names(quality.bs) <- id(fq)
+    # Extract components of ShortRead
+    reads.ds <- sread(fq)
+    quality.bs <- quality(fq)@quality # extract quality as a BString
+    names(reads.ds) <- id(fq)
+    names(quality.bs) <- id(fq)
+    
+    # Find locations of adapter B and reduce instances of BB/BBB
+    hybrid.ir <- unlist(vmatchPattern(adapterB, subject = reads.ds, max.mismatch = 2, with.indels = FALSE)) # can unlist and still know which read it refers to as has name
+    hybrid.irl <- split(hybrid.ir, names(hybrid.ir)) # split into list by read
+    hybrid.ir <- unlist(reduce(hybrid.irl)) # reduce polyB and unlist back
+    
+    # Remove those that are ...B...B...
+    duplicated <- names(hybrid.ir)[duplicated(names(hybrid.ir))] # identify those that are ...B...B... and remove from ongoing analysis (may remove a few hybrids that are ...B...B, but these are very few ~150)
+    hybrid.ir <- hybrid.ir[!(names(hybrid.ir) %in% duplicated), ] # so these are the ranges of B for reads that are ...B...A or ...B...BA
+    reads.ds <- reads.ds[names(reads.ds) %in% names(hybrid.ir), ] # and these are the reads for the above hybrids
+    quality.bs <- quality.bs[names(quality.bs) %in% names(hybrid.ir)] # and there are the qualities
+    
+    # Order reads
+    hybrid.ir <- hybrid.ir[order(names(hybrid.ir))] # order both by read name for trimming step
+    reads.ds <- reads.ds[order(names(reads.ds))]
+    quality.bs <- quality.bs[order(names(quality.bs))]
+    
+    #Remove reads that are too short for trimming
+    tooshort <- end(hybrid.ir) > width(reads.ds) # need to remove reads that are too short
+    hybrid.ir <- hybrid.ir[!tooshort]
+    reads.ds <- reads.ds[!(tooshort)]
+    quality.bs <- quality.bs[!(tooshort)]
+    
+    # Remove reads that have a negative start (i.e. adapter B overhang)
+    overhang <- start(hybrid.ir) < 1
+    hybrid.ir <- hybrid.ir[!overhang]
+    reads.ds <- reads.ds[!(overhang)]
+    quality.bs <- quality.bs[!(overhang)]
+    
+    # Create R and L arms of hybrid reads
+    cat("Splitting right and left arms\n")
+    R.reads.ds <- DNAStringSet(reads.ds, start = 1, end = (start(hybrid.ir)-1)) # R arm is from start of read to start of adapter B
+    R.quality.bs <- BStringSet(quality.bs, start = 1, end = (start(hybrid.ir)-1))
+    L.reads.ds <- DNAStringSet(reads.ds, start = (end(hybrid.ir)+1)) # L arm is from end of adapter B to end of read
+    L.quality.bs <- BStringSet(quality.bs, start = (end(hybrid.ir)+1))
+    
+    # Only keep those that have both R and L arms > 16 nt
+    R.reads.ds <- R.reads.ds[width(R.reads.ds) > 16]
+    L.reads.ds <- L.reads.ds[width(L.reads.ds) > 16]
+    R.reads.ds <- R.reads.ds[names(R.reads.ds) %in% names(L.reads.ds), ]
+    L.reads.ds <- L.reads.ds[names(L.reads.ds) %in% names(R.reads.ds), ]
+    
+    # Get corresponding qualities
+    R.quality.bs <- R.quality.bs[names(R.quality.bs) %in% names(R.reads.ds)]
+    L.quality.bs <- L.quality.bs[names(L.quality.bs) %in% names(L.reads.ds)]
+    
+    # Create ShortReads
+    R.hybrid <- ShortReadQ(sread = R.reads.ds[order(names(R.reads.ds))],
+                           id = BStringSet(paste0(names(R.reads.ds)[order(names(R.reads.ds))], "_R")),
+                           quality = R.quality.bs[order(names(R.reads.ds))])
+    L.hybrid <- ShortReadQ(sread = L.reads.ds[order(names(L.reads.ds))],
+                           id = BStringSet(paste0(names(L.reads.ds)[order(names(L.reads.ds))], "_L")),
+                           quality = L.quality.bs[order(names(L.reads.ds))])
+    hybrid <- append(R.hybrid, L.hybrid)
+    
+    # Write out FASTQ files
+    cat("Writing FASTQ files\n")
+    writeFastq(hybrid, compress = FALSE, file = paste0(processed.dir, filename, "_hybrid.fq")) # Do not compress as aligning using Bowtie
   
-  # Find locations of adapter B and reduce instances of BB/BBB
-  hybrid.ir <- unlist(vmatchPattern(adapterB, subject = reads.ds, max.mismatch = 2, with.indels = FALSE)) # can unlist and still know which read it refers to as has name
-  hybrid.irl <- split(hybrid.ir, names(hybrid.ir)) # split into list by read
-  hybrid.ir <- unlist(reduce(hybrid.irl)) # reduce polyB and unlist back
-  
-  # Remove those that are ...B...B...
-  duplicated <- names(hybrid.ir)[duplicated(names(hybrid.ir))] # identify those that are ...B...B... and remove from ongoing analysis (may remove a few hybrids that are ...B...B, but these are very few ~150)
-  hybrid.ir <- hybrid.ir[!(names(hybrid.ir) %in% duplicated), ] # so these are the ranges of B for reads that are ...B...A or ...B...BA
-  reads.ds <- reads.ds[names(reads.ds) %in% names(hybrid.ir), ] # and these are the reads for the above hybrids
-  quality.bs <- quality.bs[names(quality.bs) %in% names(hybrid.ir)] # and there are the qualities
-  
-  # Order reads
-  hybrid.ir <- hybrid.ir[order(names(hybrid.ir))] # order both by read name for trimming step
-  reads.ds <- reads.ds[order(names(reads.ds))]
-  quality.bs <- quality.bs[order(names(quality.bs))]
-  
-  #Remove reads that are too short for trimming
-  tooshort <- end(hybrid.ir) > width(reads.ds) # need to remove reads that are too short
-  hybrid.ir <- hybrid.ir[!tooshort]
-  reads.ds <- reads.ds[!(tooshort)]
-  quality.bs <- quality.bs[!(tooshort)]
-  
-  # Remove reads that have a negative start (i.e. adapter B overhang)
-  overhang <- start(hybrid.ir) < 1
-  hybrid.ir <- hybrid.ir[!overhang]
-  reads.ds <- reads.ds[!(overhang)]
-  quality.bs <- quality.bs[!(overhang)]
-
-  # Create R and L arms of hybrid reads
-  cat("Splitting right and left arms\n")
-  R.reads.ds <- DNAStringSet(reads.ds, start = 1, end = (start(hybrid.ir)-1)) # R arm is from start of read to start of adapter B
-  R.quality.bs <- BStringSet(quality.bs, start = 1, end = (start(hybrid.ir)-1))
-  L.reads.ds <- DNAStringSet(reads.ds, start = (end(hybrid.ir)+1)) # L arm is from end of adapter B to end of read
-  L.quality.bs <- BStringSet(quality.bs, start = (end(hybrid.ir)+1))
-  
-  # Only keep those that have both R and L arms > 16 nt
-  R.reads.ds <- R.reads.ds[width(R.reads.ds) > 16]
-  L.reads.ds <- L.reads.ds[width(L.reads.ds) > 16]
-  R.reads.ds <- R.reads.ds[names(R.reads.ds) %in% names(L.reads.ds), ]
-  L.reads.ds <- L.reads.ds[names(L.reads.ds) %in% names(R.reads.ds), ]
-  
-  # Get corresponding qualities
-  R.quality.bs <- R.quality.bs[names(R.quality.bs) %in% names(R.reads.ds)]
-  L.quality.bs <- L.quality.bs[names(L.quality.bs) %in% names(L.reads.ds)]
-  
-  # Create ShortReads
-  R.hybrid <- ShortReadQ(sread = R.reads.ds[order(names(R.reads.ds))],
-                         id = BStringSet(paste0(names(R.reads.ds)[order(names(R.reads.ds))], "_R")),
-                         quality = R.quality.bs[order(names(R.reads.ds))])
-  L.hybrid <- ShortReadQ(sread = L.reads.ds[order(names(L.reads.ds))],
-                         id = BStringSet(paste0(names(L.reads.ds)[order(names(L.reads.ds))], "_L")),
-                         quality = L.quality.bs[order(names(L.reads.ds))])
-  hybrid <- append(R.hybrid, L.hybrid)
-  
-  # Write out FASTQ files
-  cat("Writing FASTQ files\n")
-  writeFastq(hybrid, compress = FALSE, file = paste0(processed.dir, filename, "_hybrid.fq")) # Do not compress as aligning using Bowtie
-  
+  }
 }
 
 # =============================================================================
